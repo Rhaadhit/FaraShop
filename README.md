@@ -1,2 +1,561 @@
-# FarahShop
-web
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FaraShop</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+      padding: 30px;
+      margin: 0;
+    }
+    .welcome {
+      background-color: #007bff;
+      color: white;
+      padding: 25px;
+      border-radius: 15px;
+      text-align: center;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .produk {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      justify-content: center;
+    }
+    .item {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      text-align: center;
+      transition: transform 0.2s;
+    }
+    .item:hover {
+      transform: scale(1.05);
+    }
+    img {
+      max-width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .btn {
+      margin-top: 10px;
+      display: inline-block;
+      padding: 8px 15px;
+      background: #007bff;
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background 0.3s;
+      border: none;
+      cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+    }
+    .btn:hover {
+      background: #0056b3;
+    }
+    .btn-disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+    }
+    .keranjang-link {
+      display: block;
+      margin: 30px auto;
+      width: max-content;
+      font-size: 16px;
+    }
+    .stok-info {
+      font-size: 14px;
+      color: #666;
+      margin: 5px 0;
+    }
+    .stok-habis {
+      color: #dc3545;
+      font-weight: bold;
+    }
+    /* Keranjang styles */
+    .keranjang-container {
+      display: none;
+      font-family: 'Poppins', sans-serif;
+      background-color: #f0f2f5;
+      padding: 30px;
+    }
+    .keranjang-container h1 {
+      text-align: center;
+      color: #333;
+    }
+    .keranjang-container ul {
+      list-style-type: none;
+      padding: 0;
+      max-width: 500px;
+      margin: auto;
+    }
+    .keranjang-container li {
+      background: white;
+      margin-bottom: 10px;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .keranjang-container form {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .keranjang-container input[type="text"] {
+      padding: 10px;
+      width: 300px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      font-family: 'Poppins', sans-serif;
+    }
+    .keranjang-container button {
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-family: 'Poppins', sans-serif;
+    }
+    .keranjang-container button:hover {
+      background-color: #218838;
+    }
+    .keranjang-container a {
+      display: block;
+      margin-top: 30px;
+      text-align: center;
+      color: #007bff;
+      text-decoration: none;
+    }
+    .keranjang-container a:hover {
+      text-decoration: underline;
+    }
+    .error {
+      color: #dc3545;
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    /* Checkout styles */
+    .checkout-container {
+      display: none;
+      font-family: 'Poppins', sans-serif;
+      background: #fefefe;
+      padding: 40px;
+      text-align: center;
+    }
+    .checkout-container h1 {
+      color: #28a745;
+    }
+    .checkout-container p {
+      font-size: 18px;
+    }
+    .checkout-container #qr-code {
+      margin-top: 20px;
+      width: 200px;
+      height: 200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .checkout-container a {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 10px 15px;
+      background: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+    }
+    .checkout-container a:hover {
+      background: #0056b3;
+    }
+    select {
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-family: 'Poppins', sans-serif;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Main Shop Page -->
+  <div id="shop-container">
+    <div class="welcome">
+      <h1>Selamat Datang di mabaneed's 👋</h1>
+      <p>Temukan fashion terbaik dengan harga ramah dompet 💸</p>
+    </div>
+    <h2>Barang Dijual 🛒</h2>
+    <div class="produk" id="product-list">
+      <!-- Products will be inserted here by JavaScript -->
+    </div>
+    <a class="btn keranjang-link" id="view-cart-btn" href="#">🧺 Lihat Keranjang</a>
+  </div>
+
+  <!-- Shopping Cart Page -->
+  <div id="keranjang-container" class="keranjang-container">
+    <h1>Keranjang Belanja 🧺</h1>
+    <div id="cart-error" class="error"></div>
+    <div id="cart-items">
+      <!-- Cart items will be inserted here by JavaScript -->
+    </div>
+    <form id="checkout-form">
+      <input type="text" id="alamat" name="alamat" placeholder="Alamat pengiriman" required><br>
+      <button type="submit">Checkout Sekarang 🚚</button>
+    </form>
+    <a href="#" id="back-to-shop">← Kembali ke Belanja</a>
+  </div>
+
+  <!-- Checkout Page -->
+  <div id="checkout-container" class="checkout-container">
+    <h1>Terima Kasih Telah Berbelanja! 🛍️</h1>
+    <p><strong>Total:</strong> <span id="checkout-total"></span></p>
+    <p><strong>Alamat Pengiriman:</strong> <span id="checkout-address"></span></p>
+    <div id="qr-code"></div>
+    <br><a href="#" id="back-to-home">← Kembali ke Halaman Utama</a>
+  </div>
+
+  <script>
+    // Product data
+    const barang_list = [
+      {id: 1, nama: 'kemeja Putih', harga: 80000, gambar: 'static/Kemeja_Putih.jpg', jenis: 'pakaian', stok: 150},
+      {id: 2, nama: 'Celana Hitam', harga: 50000, gambar: 'static/Celana_Hitam.jpg', jenis: 'pakaian', stok: 150},
+      {id: 3, nama: 'Ikat Pinggang', harga: 20000, gambar: 'static/Ikat_Pinggang.jpg', jenis: 'all_size', stok: 150},
+      {id: 4, nama: 'Kerudung putih', harga: 25000, gambar: 'static/Kerudung_Putih.jpg', jenis: 'all_size', stok: 150},
+      {id: 5, nama: 'Sepatu Fantofel Pria', harga: 85000, gambar: 'static/Sepatu_Cowok.jpg', jenis: 'sepatu_pria', stok: 150},
+      {id: 6, nama: 'Hasduk Merah Putih', harga: 15000, gambar: 'static/Hasduk_Merah_Putih.jpg', jenis: 'all_size', stok: 150},
+      {id: 7, nama: 'Ring Rotan', harga: 5000, gambar: 'static/Ring_Rotan.jpg', jenis: 'all_size', stok: 150},
+      {id: 8, nama: 'Pin Garuda', harga: 10000, gambar: 'static/Pin_Garuda.jpg', jenis: 'all_size', stok: 150},
+      {id: 9, nama: 'Rok Hitam', harga: 50000, gambar: 'static/Rok_Hitam.jpg', jenis: 'pakaian', stok: 150},
+      {id: 10, nama: 'Pin Merah Putih', harga: 10000, gambar: 'static/Pin_Merah_Putih.jpg', jenis: 'all_size', stok: 150},
+      {id: 11, nama: 'Kaus Kaki', harga: 15000, gambar: 'static/Kaus_Kaki.jpg', jenis: 'all_size', stok: 150},
+      {id: 12, nama: 'Sepatu Fantofel Wanita', harga: 80000, gambar: 'static/Sepatu_Cewek.jpg', jenis: 'sepatu_wanita', stok: 150},
+    ];
+
+    const DISKON_PERSEN = 10;
+    let keranjang = JSON.parse(localStorage.getItem('keranjang')) || {};
+
+    // Format currency
+    function formatCurrency(amount) {
+      return 'Rp' + amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    // Render products
+    function renderProducts() {
+      const productList = document.getElementById('product-list');
+      productList.innerHTML = '';
+
+      barang_list.forEach(barang => {
+        const productDiv = document.createElement('div');
+        productDiv.className = 'item';
+
+        let sizeSelect = '';
+        if (barang.jenis === 'sepatu_pria') {
+          sizeSelect = `
+            <select name="ukuran" ${barang.stok <= 0 ? 'disabled' : ''} required>
+              <option value="">Ukuran</option>
+              <option value="38">38</option>
+              <option value="39">39</option>
+              <option value="40">40</option>
+              <option value="41">41</option>
+              <option value="42">42</option>
+            </select>
+          `;
+        } else if (barang.jenis === 'sepatu_wanita') {
+          sizeSelect = `
+            <select name="ukuran" ${barang.stok <= 0 ? 'disabled' : ''} required>
+              <option value="">Ukuran</option>
+              <option value="36">36</option>
+              <option value="37">37</option>
+              <option value="38">38</option>
+              <option value="39">39</option>
+              <option value="40">40</option>
+            </select>
+          `;
+        } else if (barang.jenis === 'all_size') {
+          sizeSelect = '<input type="hidden" name="ukuran" value="All Size"><span>All Size</span>';
+        } else {
+          sizeSelect = `
+            <select name="ukuran" ${barang.stok <= 0 ? 'disabled' : ''} required>
+              <option value="">Ukuran</option>
+              <option value="S">S</option>
+              <option value="M">M</option>
+              <option value="L">L</option>
+              <option value="XL">XL</option>
+            </select>
+          `;
+        }
+
+        productDiv.innerHTML = `
+          <img src="${barang.gambar}">
+          <h3>${barang.nama}</h3>
+          <p><strong>${formatCurrency(barang.harga)}</strong></p>
+          <p class="stok-info">Stok: ${barang.stok}</p>
+          ${barang.stok <= 0 ? '<p class="stok-habis">Stok habis</p>' : ''}
+          <button class="btn" onclick="decreaseItem(${barang.id})">Kurangi</button>
+          ${sizeSelect}
+          <button class="btn ${barang.stok <= 0 ? 'btn-disabled' : ''}" 
+                  onclick="addToCart(${barang.id}, this.previousElementSibling)" 
+                  ${barang.stok <= 0 ? 'disabled' : ''}>
+            Tambah
+          </button>
+        `;
+
+        productList.appendChild(productDiv);
+      });
+    }
+
+    // Add item to cart
+    function addToCart(id, sizeElement) {
+      const barang = barang_list.find(item => item.id === id);
+      if (!barang || barang.stok <= 0) return;
+
+      let ukuran = 'All Size';
+      if (barang.jenis !== 'all_size') {
+        if (sizeElement.tagName === 'SELECT') {
+          ukuran = sizeElement.value;
+          if (!ukuran) {
+            alert('Silakan pilih ukuran terlebih dahulu');
+            return;
+          }
+        }
+      }
+
+      const key = ukuran !== 'All Size' ? `${id}_${ukuran}` : id.toString();
+      
+      // Calculate current quantity in cart
+      const currentQty = keranjang[key] || 0;
+      
+      // Check if stock is sufficient
+      if (currentQty >= barang.stok) {
+        alert('Stok tidak mencukupi');
+        return;
+      }
+      
+      keranjang[key] = currentQty + 1;
+      localStorage.setItem('keranjang', JSON.stringify(keranjang));
+      alert('Produk ditambahkan ke keranjang');
+    }
+
+    // Decrease item quantity
+    function decreaseItem(id) {
+      // Find all items in cart with this ID
+      const keysToUpdate = Object.keys(keranjang).filter(k => 
+        k.startsWith(`${id}_`) || k === id.toString()
+      );
+      
+      if (keysToUpdate.length === 0) return;
+      
+      for (const key of keysToUpdate) {
+        keranjang[key] -= 1;
+        if (keranjang[key] <= 0) {
+          delete keranjang[key];
+        }
+      }
+      
+      localStorage.setItem('keranjang', JSON.stringify(keranjang));
+      renderCart();
+    }
+
+    // Render shopping cart
+    function renderCart() {
+      const cartItemsDiv = document.getElementById('cart-items');
+      const errorDiv = document.getElementById('cart-error');
+      errorDiv.textContent = '';
+      
+      let item_keranjang = [];
+      let total = 0;
+      let error = null;
+
+      for (const [key, jumlah] of Object.entries(keranjang)) {
+        let id, ukuran;
+        if (key.includes('_')) {
+          [id, ukuran] = key.split('_');
+        } else {
+          id = key;
+          ukuran = 'All Size';
+        }
+        
+        const barang = barang_list.find(item => item.id === parseInt(id));
+        if (barang) {
+          // Validate stock
+          if (jumlah > barang.stok) {
+            error = `Stok ${barang.nama} tidak mencukupi`;
+            keranjang[key] = barang.stok;
+            jumlah = barang.stok;
+          }
+          
+          const subtotal = barang.harga * jumlah;
+          total += subtotal;
+          
+          // Format size display
+          let display_size = '';
+          if (barang.jenis !== 'all_size') {
+            display_size = ` (Ukuran ${ukuran})`;
+          }
+          
+          item_keranjang.push({
+            nama: `${barang.nama}${display_size}`,
+            harga: barang.harga,
+            jumlah: jumlah,
+            subtotal: subtotal
+          });
+        }
+      }
+
+      if (total > 0) {
+        const diskon = total * DISKON_PERSEN / 100;
+        total -= diskon;
+      }
+
+      localStorage.setItem('keranjang', JSON.stringify(keranjang));
+
+      if (item_keranjang.length === 0) {
+        cartItemsDiv.innerHTML = '<p style="text-align:center;">Keranjang kosong 😞</p>';
+      } else {
+        let itemsHTML = '<ul>';
+        item_keranjang.forEach(item => {
+          itemsHTML += `
+            <li>${item.nama} x ${item.jumlah} = <strong>${formatCurrency(item.subtotal)}</strong></li>
+          `;
+        });
+        itemsHTML += '</ul>';
+        itemsHTML += `<p style="text-align: center;">Total setelah diskon: <strong>${formatCurrency(total)}</strong></p>`;
+        cartItemsDiv.innerHTML = itemsHTML;
+      }
+
+      if (error) {
+        errorDiv.textContent = error;
+      }
+    }
+
+    // Checkout function
+    function checkout(event) {
+      event.preventDefault();
+      
+      const alamat = document.getElementById('alamat').value;
+      if (!alamat) {
+        alert('Silakan masukkan alamat pengiriman');
+        return;
+      }
+      
+      // Validate stock before checkout
+      for (const [key, jumlah] of Object.entries(keranjang)) {
+        let id;
+        if (key.includes('_')) {
+          id = parseInt(key.split('_')[0]);
+        } else {
+          id = parseInt(key);
+        }
+        
+        const barang = barang_list.find(item => item.id === id);
+        if (!barang || jumlah > barang.stok) {
+          alert('Stok tidak mencukupi untuk beberapa produk');
+          renderCart();
+          return;
+        }
+      }
+      
+      // Calculate total
+      let total = 0;
+      for (const [key, jumlah] of Object.entries(keranjang)) {
+        let id;
+        if (key.includes('_')) {
+          id = parseInt(key.split('_')[0]);
+        } else {
+          id = parseInt(key);
+        }
+        
+        const barang = barang_list.find(item => item.id === id);
+        if (barang) {
+          total += barang.harga * jumlah;
+        }
+      }
+      
+      if (total > 0) {
+        const diskon = total * DISKON_PERSEN / 100;
+        total -= diskon;
+      }
+      
+      // Generate QR code
+      const qr = qrcode(0, 'L');
+      qr.addData(`Transfer ${formatCurrency(total)} ke 1234567890\nAlamat: ${alamat}`);
+      qr.make();
+      const qrImg = qr.createImgTag(4);
+      
+      document.getElementById('checkout-total').textContent = formatCurrency(total);
+      document.getElementById('checkout-address').textContent = alamat;
+      document.getElementById('qr-code').innerHTML = qrImg;
+      
+      // Update stock (in a real app, this would be server-side)
+      for (const [key, jumlah] of Object.entries(keranjang)) {
+        let id;
+        if (key.includes('_')) {
+          id = parseInt(key.split('_')[0]);
+        } else {
+          id = parseInt(key);
+        }
+        
+        const barang = barang_list.find(item => item.id === id);
+        if (barang) {
+          barang.stok -= jumlah;
+        }
+      }
+      
+      // Clear cart
+      keranjang = {};
+      localStorage.removeItem('keranjang');
+      
+      // Show checkout page
+      document.getElementById('shop-container').style.display = 'none';
+      document.getElementById('keranjang-container').style.display = 'none';
+      document.getElementById('checkout-container').style.display = 'block';
+    }
+
+    // Navigation functions
+    function showCart() {
+      renderCart();
+      document.getElementById('shop-container').style.display = 'none';
+      document.getElementById('keranjang-container').style.display = 'block';
+      document.getElementById('checkout-container').style.display = 'none';
+    }
+
+    function showShop() {
+      renderProducts();
+      document.getElementById('shop-container').style.display = 'block';
+      document.getElementById('keranjang-container').style.display = 'none';
+      document.getElementById('checkout-container').style.display = 'none';
+    }
+
+    function showHome() {
+      renderProducts();
+      document.getElementById('shop-container').style.display = 'block';
+      document.getElementById('keranjang-container').style.display = 'none';
+      document.getElementById('checkout-container').style.display = 'none';
+    }
+
+    // Event listeners
+    document.getElementById('view-cart-btn').addEventListener('click', showCart);
+    document.getElementById('back-to-shop').addEventListener('click', showShop);
+    document.getElementById('back-to-home').addEventListener('click', showHome);
+    document.getElementById('checkout-form').addEventListener('submit', checkout);
+
+    // Initialize the app
+    showShop();
+  </script>
+</body>
+</html>
