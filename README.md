@@ -1,2 +1,2 @@
-# FaraShop
+# FarahShop
 web
